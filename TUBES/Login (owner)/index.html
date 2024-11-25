@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./vars.css">
+  <link rel="stylesheet" href="./style.css">
+  
+  <style>
+   a,
+   button,
+   input,
+   select,
+   h1,
+   h2,
+   h3,
+   h4,
+   h5,
+   * {
+       box-sizing: border-box;
+       margin: 0;
+       padding: 0;
+       border: none;
+       text-decoration: none;
+       background: none;
+   
+       -webkit-font-smoothing: antialiased;
+   }
+   
+   menu, ol, ul {
+       list-style-type: none;
+       margin: 0;
+       padding: 0;
+   }
+   </style>
+  <title>Document</title>
+</head>
+<body>
+  <div
+    class="login-owner"
+    style="background: url(login-owner.png) center; background-size: cover; background-repeat: no-repeat;"
+  >
+    <form action="your-login-url-here" method="POST">
+      <div class="username">
+        <div class="label">Email Address</div>
+        <div class="input">
+          <!-- Input field for username -->
+          <input type="email" name="email" class="value"  required>
+        </div>
+      </div>
+
+      <div class="password">
+        <div class="label">Password</div>
+        <div class="input">
+          <!-- Input field for password -->
+          <input type="password" name="password" class="value"  required>
+        </div>
+      </div>
+
+      <div class="login-btn">
+        <!-- Link that acts as the login button -->
+        <a href="..\Homepage (after login) owner\index.html" class="button">Log In</a>
+      </div>
+
+      <div class="login-to-your-account">Login to Your Account</div>
+    </form>
+  </div>
+  
+</body>
+</html>
