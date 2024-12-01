@@ -3,26 +3,23 @@ session_start();
 require_once('db_connection.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Sanitize user input
     $nama = sanitize($_POST['nama']);
-    $tanggal_lahir = $_POST['tanggal_lahir'];
+    $no_hp = sanitize($_POST['no_hp']);
     $email = sanitize($_POST['email']);
+    $alamat = sanitize($_POST['alamat']);
+    $kecamatan = sanitize($_POST['kecamatan']);
+    $kelurahan = sanitize($_POST['kelurahan']);
     $username = sanitize($_POST['username']);
     $password = hash('sha256', $_POST['password']);
     
-    // Generate nomor rekam medis
-    $nomor_rekam_medis = generateRekamMedis();
-    
-    // Hitung umur
-    $birthDate = new DateTime($tanggal_lahir);
-    $today = new DateTime();
-    $umur = $today->diff($birthDate)->y;
-    
+    // Database connection
     $conn = connectDB();
     
     // Check if username already exists
     $checkUsername = "SELECT Username FROM Pasien WHERE Username = '$username'";
     $result = sqlsrv_query($conn, $checkUsername);
-        
+    
     if(sqlsrv_has_rows($result)) {
         $_SESSION['error'] = "Username sudah digunakan. Silakan pilih username lain.";
         header("Location: register.php");
@@ -30,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     // Insert new patient
-    $sql = "INSERT INTO Pasien (Nama, Tanggal_Lahir, Username, Password, Email, Nomor_Rekam_Medis, Umur) 
-            VALUES ('$nama', '$tanggal_lahir', '$username', '$password', '$email', '$nomor_rekam_medis', $umur)";
+    $sql = "INSERT INTO Pasien (Nama, No_HP, Email, Alamat, Kecamatan, Kelurahan, Username, Password) 
+            VALUES ('$nama', '$no_hp', '$email', '$alamat', '$kecamatan', '$kelurahan', '$username', '$password')";
     
     $result = sqlsrv_query($conn, $sql);
     
@@ -41,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
     
-    $_SESSION['success'] = "Pendaftaran berhasil! Nomor Rekam Medis Anda: " . $nomor_rekam_medis;
+    $_SESSION['success'] = "Pendaftaran berhasil! Silakan login.";
     header("Location: login.php");
     exit();
 } else {

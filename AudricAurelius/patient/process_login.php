@@ -17,10 +17,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     // Determine table based on user type
     switch($user_type) {
-        case 'pasien':
-            $table = 'Pasien';
-            $id_field = 'ID_Pasien';
-            $redirect = 'patient_dashboard.php';
+        case 'pelanggan':
+            $table = 'pelanggan';
+            $id_field = 'Nama';
+            $redirect = 'pelanggan_dashboard.php';
             break;
         default:
             $_SESSION['error'] = "Tipe pengguna tidak valid";
