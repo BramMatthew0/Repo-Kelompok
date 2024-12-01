@@ -126,6 +126,7 @@ if ($result->num_rows == 0) {
             position: relative;
             width: 100%;
         }
+
         nav ul {
             list-style: none;
             display: flex;
@@ -133,20 +134,34 @@ if ($result->num_rows == 0) {
             padding: 0;
             margin: 0;
         }
+
         nav ul li {
-            margin: 0 20px;
+            margin: 0 20px;  /* Menambah jarak antar item */
         }
+
         nav a {
             color: white;
             text-decoration: none;
-            font-size: 20px;
-            font-weight: bold;
-            padding: 10px 20px;
+            font-size: 20px;  /* Memperbesar ukuran font */
+            font-weight: bold;  /* Menambah ketebalan teks */
+            padding: 10px 20px;  /* Memberikan padding untuk memperbesar area klik */
         }
+
         nav a:hover {
             color: #007bff;
-            background-color: #444;
-            border-radius: 5px;
+            background-color: #444; /* Menambahkan efek background saat hover */
+            border-radius: 5px; /* Memberikan efek melengkung pada sudut */
+        }
+
+        .cart-icon {
+            position: absolute;
+            right: 20px; /* Menempatkan ikon di kanan */
+            font-size: 24px;
+            color: white;
+        }
+
+        .cart-icon:hover {
+            color: #3498db;
         }
         .cart-items {
             padding: 20px;
@@ -217,7 +232,7 @@ if ($result->num_rows == 0) {
             <li><a href="product.php">Product</a></li>
             <li><a href="history.php">History</a></li>
             <li><a href="logout.php">Logout</a></li>
-            <li><a href="cart.php"><i class="fas fa-shopping-cart"></i></a></li>
+            <li><a href="cart.php"><i class="fas fa-shopping-cart cart-icon"></i></a></li>
         </ul>
     </nav>
 
@@ -243,7 +258,7 @@ if ($result->num_rows == 0) {
                         <p>Jumlah: <?php echo (int)$item['Jumlah_Produk_Keranjang']; ?></p>
                     </div>
                     <div class="action-buttons">
-                        <a class="edit" href="edit_cart.php?id=<?php echo $item['ID_Keranjang']; ?>">Edit</a>
+                        <a class="edit" href="edit.php?id=<?php echo $item['ID_Keranjang']; ?>">Edit</a>
                         <a class="remove" href="cart.php?remove=<?php echo $item['ID_Keranjang']; ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">Remove</a>
                     </div>
                 </div>

@@ -153,7 +153,7 @@
                     <h3>Kursi Davon</h3>
                     <p class="price">Rp 2,500,000</p>
                     <p>Sofa Davon 1 Dudukan Idemu hadir untuk membuat berbagai ruang yang ada di rumah anda menjadi lebih indah. Sofa Davon 1 dudukan Idemu memiliki desain yang minimalis sehingga membuat ruangan di rumah anda menjadi elegan dan modern, Sofa Davon 1 dudukan Idemu memiliki warna soft dan kualitas baik yang menciptakan kenyamanan saat anda berkumpul dengan keluarga, kerabat dan para sahabat.</p>
-                    <a href="product_detail.php?id=1" class="button">Learn More</a>
+                    <!-- <a href="product_detail.php?id=1" class="button">Learn More</a> -->
                 </div>
             </div>
         </div>
