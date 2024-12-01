@@ -133,7 +133,8 @@
             <li><a href="pelanggan_dashboard.php">Home</a></li>
             <li><a href="review.php">Review</a></li>
             <li><a href="contact.php">Contact</a></li>
-            <li><a href="catalogue.php">Product</a></li>
+            <li><a href="product.php">Product</a></li>
+            <li><a href="history.php">History</a></li>
             <li><a href="logout.php">Logout</a></li>
             <!-- Icon Keranjang di pojok kanan -->
             <li><a href="cart.php"><i class="fas fa-shopping-cart cart-icon"></i></a></li>

@@ -137,6 +137,7 @@ body {
         <li><a href="review.php">Review</a></li>
         <li><a href="contact.php">Contact</a></li>
         <li><a href="product.php">Product</a></li>
+        <li><a href="history.php">History</a></li>
         <li><a href="logout.php">Logout</a></li>
         <li><a href="cart.php"><i class="fas fa-shopping-cart cart-icon"></i></a></li>
     </ul>

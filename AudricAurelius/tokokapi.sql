@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 01, 2024 at 01:36 PM
+-- Generation Time: Dec 01, 2024 at 03:25 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,6 +43,33 @@ INSERT INTO `contact` (`Nama_Contact`, `Review_Contact`, `Date_Contact`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `history`
+--
+
+CREATE TABLE `history` (
+  `Nama_Pelanggan_History` varchar(255) DEFAULT NULL,
+  `Id_Produk_History` int(11) DEFAULT NULL,
+  `Nama_Produk_History` varchar(255) DEFAULT NULL,
+  `Material_Produk_History` varchar(255) DEFAULT NULL,
+  `Warna_Produk_History` varchar(50) DEFAULT NULL,
+  `Harga_Produk_History` decimal(10,2) DEFAULT NULL,
+  `Jumlah_Produk_History` varchar(100) DEFAULT NULL,
+  `Tanggal_History` date NOT NULL DEFAULT current_timestamp(),
+  `Tanggal_Estimasi` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `history`
+--
+
+INSERT INTO `history` (`Nama_Pelanggan_History`, `Id_Produk_History`, `Nama_Produk_History`, `Material_Produk_History`, `Warna_Produk_History`, `Harga_Produk_History`, `Jumlah_Produk_History`, `Tanggal_History`, `Tanggal_Estimasi`) VALUES
+('Bram', 1, 'Kursi', 'Kayu', 'biru', 700000.00, '1', '2024-12-01', '2024-12-05'),
+('bram', 1, 'Kursi', 'kayu', 'biru', 700000.00, '1', '2024-12-01', '2024-12-05'),
+('bram', 1, 'Kursi', 'kayu', 'biru', 700000.00, '1', '2024-12-01', '2024-12-05');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `keranjang`
 --
 
@@ -55,13 +82,6 @@ CREATE TABLE `keranjang` (
   `Harga_Produk_Keranjang` decimal(10,2) DEFAULT NULL,
   `Jumlah_Produk_Keranjang` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `keranjang`
---
-
-INSERT INTO `keranjang` (`Nama_Pelanggan_Keranjang`, `Id_Produk_Keranjang`, `Nama_Produk_Keranjang`, `Material_Produk_Keranjang`, `Warna_Produk_Keranjang`, `Harga_Produk_Keranjang`, `Jumlah_Produk_Keranjang`) VALUES
-('Bram', 1, 'Kursi', 'Kayu', 'biru', 700000.00, '1');
 
 -- --------------------------------------------------------
 
@@ -127,7 +147,7 @@ CREATE TABLE `produk` (
 --
 
 INSERT INTO `produk` (`Id_Produk`, `Nama_Produk`, `Warna_Produk`, `Harga_Produk`, `Material_Produk`, `Stok_Produk`) VALUES
-(1, 'Kursi', 'biru', 700000.00, 'kayu', 11),
+(1, 'Kursi', 'biru', 700000.00, 'kayu', 10),
 (2, 'Meja', 'coklat', 200000.00, 'kayu', 10);
 
 -- --------------------------------------------------------
