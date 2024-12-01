@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 30, 2024 at 09:59 AM
+-- Generation Time: Dec 01, 2024 at 01:36 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,6 +24,48 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `contact`
+--
+
+CREATE TABLE `contact` (
+  `Nama_Contact` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `Review_Contact` text CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `Date_Contact` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `contact`
+--
+
+INSERT INTO `contact` (`Nama_Contact`, `Review_Contact`, `Date_Contact`) VALUES
+('bram', 'Barang bisa di kirim ke daerah jakarta tidak?', '2024-12-01');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `keranjang`
+--
+
+CREATE TABLE `keranjang` (
+  `Nama_Pelanggan_Keranjang` varchar(255) DEFAULT NULL,
+  `Id_Produk_Keranjang` int(11) NOT NULL,
+  `Nama_Produk_Keranjang` varchar(255) DEFAULT NULL,
+  `Material_Produk_Keranjang` varchar(255) DEFAULT NULL,
+  `Warna_Produk_Keranjang` varchar(50) DEFAULT NULL,
+  `Harga_Produk_Keranjang` decimal(10,2) DEFAULT NULL,
+  `Jumlah_Produk_Keranjang` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `keranjang`
+--
+
+INSERT INTO `keranjang` (`Nama_Pelanggan_Keranjang`, `Id_Produk_Keranjang`, `Nama_Produk_Keranjang`, `Material_Produk_Keranjang`, `Warna_Produk_Keranjang`, `Harga_Produk_Keranjang`, `Jumlah_Produk_Keranjang`) VALUES
+('Bram', 1, 'Kursi', 'Kayu', 'biru', 700000.00, '1');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `pelanggan`
 --
 
@@ -37,6 +79,13 @@ CREATE TABLE `pelanggan` (
   `Username` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `Password` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `pelanggan`
+--
+
+INSERT INTO `pelanggan` (`Nama`, `No_HP`, `Email`, `Alamat`, `Kecamatan`, `Kelurahan`, `Username`, `Password`) VALUES
+('bram', '082115424343', 'bram@gmail.com', 'bukit jarian', 'Cidadap', 'Cisaranten Kulon', 'bram', '$2y$10$9Or8ndhkiStEB.eSJSGh.OSxqlXpLgE8xh/916gbx5J9SRIggDmZ2');
 
 -- --------------------------------------------------------
 
@@ -81,9 +130,39 @@ INSERT INTO `produk` (`Id_Produk`, `Nama_Produk`, `Warna_Produk`, `Harga_Produk`
 (1, 'Kursi', 'biru', 700000.00, 'kayu', 11),
 (2, 'Meja', 'coklat', 200000.00, 'kayu', 10);
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `review`
+--
+
+CREATE TABLE `review` (
+  `Nama_Pelanggan_Review` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `Nama_Produk_Review` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `Komentar_Review` text CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `review`
+--
+
+INSERT INTO `review` (`Nama_Pelanggan_Review`, `Nama_Produk_Review`, `Komentar_Review`) VALUES
+('Bram', 'Kursi Gaming', 'Bagus sekali!'),
+('Rafli', 'Meja Belajar', 'Bagus sekali dan Rapih!'),
+('Afifah', 'Meja Makan', 'Kurang Presisi tapi harga sudah oke'),
+('John Dode', 'Kaki Meja', 'Bagus , cuman pengecatan kurang rapih '),
+('Jane Doe', 'Kaki kursi', 'jelek , bahan ga sesuai'),
+('Bambang', 'Kasur', 'Ga empuk , tapi kualitas sesuai harga');
+
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `keranjang`
+--
+ALTER TABLE `keranjang`
+  ADD PRIMARY KEY (`Id_Produk_Keranjang`);
 
 --
 -- Indexes for table `pelanggan`
