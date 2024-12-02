@@ -1,4 +1,4 @@
-<?php 
+<?php
 // Start session
 session_start();
 
@@ -13,8 +13,11 @@ if (!isset($_SESSION['username'])) {
 
 // Get the logged-in user's data
 $username = $_SESSION['username'];
-$query_user = "SELECT Nama FROM pelanggan WHERE Username = '$username'";
-$result_user = $conn->query($query_user);
+$query_user = "SELECT Nama FROM pelanggan WHERE Username = ?";
+$stmt = $conn->prepare($query_user);
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result_user = $stmt->get_result();
 
 // Check for query error
 if (!$result_user || $result_user->num_rows == 0) {
@@ -34,22 +37,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     $product_color = $_POST['product_color'];
 
     // Check if the product is already in the cart for this customer
-    $query_check_cart = "SELECT * FROM keranjang WHERE Nama_Pelanggan_Keranjang = '$customer_name' AND Id_Produk_Keranjang = '$product_id'";
-    $result_check_cart = $conn->query($query_check_cart);
+    $query_check_cart = "SELECT * FROM keranjang WHERE Nama_Pelanggan_Keranjang = ? AND Id_Produk_Keranjang = ?";
+    $stmt_check_cart = $conn->prepare($query_check_cart);
+    $stmt_check_cart->bind_param("si", $customer_name, $product_id);
+    $stmt_check_cart->execute();
+    $result_check_cart = $stmt_check_cart->get_result();
 
     if ($result_check_cart->num_rows > 0) {
         // Update quantity if the product already exists in the cart
         $query_update_cart = "UPDATE keranjang 
                               SET Jumlah_Produk_Keranjang = Jumlah_Produk_Keranjang + 1 
-                              WHERE Nama_Pelanggan_Keranjang = '$customer_name' AND Id_Produk_Keranjang = '$product_id'";
-        $conn->query($query_update_cart);
+                              WHERE Nama_Pelanggan_Keranjang = ? AND Id_Produk_Keranjang = ?";
+        $stmt_update_cart = $conn->prepare($query_update_cart);
+        $stmt_update_cart->bind_param("si", $customer_name, $product_id);
+        $stmt_update_cart->execute();
     } else {
         // Insert a new row into the cart
         $query_insert_cart = "INSERT INTO keranjang 
                               (Nama_Pelanggan_Keranjang, Id_Produk_Keranjang, Nama_Produk_Keranjang, Material_Produk_Keranjang, Warna_Produk_Keranjang, Harga_Produk_Keranjang, Jumlah_Produk_Keranjang) 
-                              VALUES 
-                              ('$customer_name', '$product_id', '$product_name', '$product_material', '$product_color', '$product_price', 1)";
-        $conn->query($query_insert_cart);
+                              VALUES (?, ?, ?, ?, ?, ?, 1)";
+        $stmt_insert_cart = $conn->prepare($query_insert_cart);
+        $stmt_insert_cart->bind_param("sisssd", $customer_name, $product_id, $product_name, $product_material, $product_color, $product_price);
+        $stmt_insert_cart->execute();
     }
 
     // Feedback message
@@ -67,6 +76,23 @@ if (!$result) {
 
 // Fetch products as an associative array
 $products = $result->fetch_all(MYSQLI_ASSOC);
+
+// Function to categorize products based on the first word of the product name
+function getCategory($productName) {
+    $word = strtolower(explode(' ', $productName)[0]); // Get the first word
+    switch ($word) {
+        case 'lemari':
+            return 'lemari';
+        case 'kasur':
+            return 'kasur';
+        case 'meja':
+            return 'meja';
+        case 'kursi':
+            return 'kursi';
+        default:
+            return 'komponen'; // Default for anything else
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -77,7 +103,7 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
     <title>Product List</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
-        /* Sama seperti style sebelumnya */
+        /* Styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -90,10 +116,8 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
             width: 100%;
         }
-
         nav ul {
             list-style: none;
             display: flex;
@@ -101,25 +125,21 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
             padding: 0;
             margin: 0;
         }
-
         nav ul li {
-            margin: 0 20px;  /* Menambah jarak antar item */
+            margin: 0 20px;
         }
-
         nav a {
             color: white;
             text-decoration: none;
-            font-size: 20px;  /* Memperbesar ukuran font */
-            font-weight: bold;  /* Menambah ketebalan teks */
-            padding: 10px 20px;  /* Memberikan padding untuk memperbesar area klik */
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px 20px;
         }
-
         nav a:hover {
             color: #007bff;
-            background-color: #444; /* Menambahkan efek background saat hover */
-            border-radius: 5px; /* Memberikan efek melengkung pada sudut */
+            background-color: #444;
+            border-radius: 5px;
         }
-
         .cart-icon {
             position: absolute;
             right: 20px; /* Menempatkan ikon di kanan */
@@ -130,22 +150,14 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
         .cart-icon:hover {
             color: #3498db;
         }
-
         .product-section {
             padding: 20px;
         }
-
-        .product-section h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
         .tabs {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
         }
-
         .tab {
             margin: 0 10px;
             padding: 10px 20px;
@@ -154,28 +166,22 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
             cursor: pointer;
             font-weight: bold;
         }
-
         .tab.active {
             background-color: #007bff;
             color: white;
         }
-
         .product-list {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            padding: 20px;
         }
-
         .product-item {
             background-color: white;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-
         .add-to-cart-btn {
             margin-top: 10px;
             padding: 10px 15px;
@@ -185,31 +191,11 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
             border-radius: 5px;
             cursor: pointer;
         }
-
         .add-to-cart-btn:hover {
             background-color: #0056b3;
         }
-
-        .success-message {
-            color: green;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 900px) {
-            .product-list {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .product-list {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
     <script>
-        // JavaScript for filtering products by category
         function filterProducts(category) {
             const products = document.querySelectorAll('.product-item');
             products.forEach(product => {
@@ -242,10 +228,6 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
 </nav>
 
 <section class="product-section">
-    <h2>Product List</h2>
-    <?php if (isset($success_message)): ?>
-        <p class="success-message"><?php echo $success_message; ?></p>
-    <?php endif; ?>
     <div class="tabs">
         <div class="tab active" id="tab-all" onclick="filterProducts('all')">All</div>
         <div class="tab" id="tab-komponen" onclick="filterProducts('komponen')">Komponen</div>
@@ -256,11 +238,7 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
     </div>
     <div class="product-list">
         <?php foreach ($products as $product): ?>
-            <?php
-                // Categorize products based on the product name
-                $category = strtolower($product['Nama_Produk']);
-            ?>
-            <div class="product-item" data-category="<?php echo htmlspecialchars($category); ?>">
+            <div class="product-item" data-category="<?php echo htmlspecialchars(getCategory($product['Nama_Produk'])); ?>">
                 <h3><?php echo htmlspecialchars($product['Nama_Produk']); ?></h3>
                 <p>Warna: <?php echo htmlspecialchars($product['Warna_Produk']); ?></p>
                 <p>Material: <?php echo htmlspecialchars($product['Material_Produk']); ?></p>

@@ -158,7 +158,6 @@ $success_message = isset($_GET['message']) ? $_GET['message'] : null;
 $message = $result->num_rows == 0 ? "Keranjang Anda kosong." : null;
 ?>
 
-?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -182,6 +181,7 @@ $message = $result->num_rows == 0 ? "Keranjang Anda kosong." : null;
             position: relative;
             width: 100%;
         }
+
         nav ul {
             list-style: none;
             display: flex;
@@ -189,27 +189,32 @@ $message = $result->num_rows == 0 ? "Keranjang Anda kosong." : null;
             padding: 0;
             margin: 0;
         }
+
         nav ul li {
-            margin: 0 20px;
+            margin: 0 20px;  /* Menambah jarak antar item */
         }
+
         nav a {
             color: white;
             text-decoration: none;
-            font-size: 20px;
-            font-weight: bold;
-            padding: 10px 20px;
+            font-size: 20px;  /* Memperbesar ukuran font */
+            font-weight: bold;  /* Menambah ketebalan teks */
+            padding: 10px 20px;  /* Memberikan padding untuk memperbesar area klik */
         }
+
         nav a:hover {
             color: #007bff;
-            background-color: #444;
-            border-radius: 5px;
+            background-color: #444; /* Menambahkan efek background saat hover */
+            border-radius: 5px; /* Memberikan efek melengkung pada sudut */
         }
+
         .cart-icon {
             position: absolute;
-            right: 20px;
+            right: 20px; /* Menempatkan ikon di kanan */
             font-size: 24px;
             color: white;
         }
+
         .cart-icon:hover {
             color: #3498db;
         }
