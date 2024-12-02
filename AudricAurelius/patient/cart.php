@@ -32,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_cart'])) {
 
     // Validasi input
     if ($id_keranjang > 0 && $jumlah > 0 && !empty($material) && !empty($warna)) {
-        // Query untuk memperbarui data
         $query_update = "UPDATE keranjang 
                          SET Material_Produk_Keranjang = ?, 
                              Warna_Produk_Keranjang = ?, 
@@ -54,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_cart'])) {
 
 // Hapus item dari keranjang jika parameter 'remove' ada
 if (isset($_GET['remove'])) {
-    $id_keranjang = intval($_GET['remove']); // Pastikan nilai ID valid
+    $id_keranjang = intval($_GET['remove']); 
     $query_remove = "DELETE FROM keranjang WHERE Id_Produk_Keranjang = ? AND Nama_Pelanggan_Keranjang = ?";
     $stmt = $conn->prepare($query_remove);
     $stmt->bind_param("is", $id_keranjang, $nama_pelanggan);
@@ -63,6 +62,78 @@ if (isset($_GET['remove'])) {
         exit();
     } else {
         die("Gagal menghapus item: " . $conn->error);
+    }
+}
+
+// Checkout logic
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
+    $query_cart = "SELECT * FROM keranjang WHERE Nama_Pelanggan_Keranjang = ?";
+    $stmt_cart = $conn->prepare($query_cart);
+    $stmt_cart->bind_param("s", $nama_pelanggan);
+    $stmt_cart->execute();
+    $result_cart = $stmt_cart->get_result();
+
+    if ($result_cart->num_rows > 0) {
+        $conn->begin_transaction();
+
+        try {
+            while ($row = $result_cart->fetch_assoc()) {
+                // Pindahkan data ke tabel history
+                $query_insert_history = "INSERT INTO history 
+                    (Nama_Pelanggan_History, Id_Produk_History, Nama_Produk_History, Material_Produk_History, Warna_Produk_History, Harga_Produk_History, Jumlah_Produk_History, Tanggal_History, Tanggal_Estimasi)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt_history = $conn->prepare($query_insert_history);
+                $tanggal = date("Y-m-d");
+                $tanggal_estimasi = date("Y-m-d", strtotime("+3 days"));
+                $stmt_history->bind_param(
+                    "sissssiss",
+                    $row['Nama_Pelanggan_Keranjang'],
+                    $row['Id_Produk_Keranjang'],
+                    $row['Nama_Produk_Keranjang'],
+                    $row['Material_Produk_Keranjang'],
+                    $row['Warna_Produk_Keranjang'],
+                    $row['Harga_Produk_Keranjang'],
+                    $row['Jumlah_Produk_Keranjang'],
+                    $tanggal,
+                    $tanggal_estimasi
+                );
+                $stmt_history->execute();
+
+                // Kurangi stok produk
+                $query_update_stock = "UPDATE produk 
+                                       SET Stok_Produk = Stok_Produk - ? 
+                                       WHERE Id_Produk = ? AND Stok_Produk >= ?";
+                $stmt_stock = $conn->prepare($query_update_stock);
+                $stmt_stock->bind_param(
+                    "iii",
+                    $row['Jumlah_Produk_Keranjang'],
+                    $row['Id_Produk_Keranjang'],
+                    $row['Jumlah_Produk_Keranjang']
+                );
+                $stmt_stock->execute();
+
+                if ($stmt_stock->affected_rows === 0) {
+                    throw new Exception("Stok tidak mencukupi untuk produk: " . $row['Nama_Produk_Keranjang']);
+                }
+            }
+
+            // Kosongkan keranjang
+            $query_delete_cart = "DELETE FROM keranjang WHERE Nama_Pelanggan_Keranjang = ?";
+            $stmt_delete = $conn->prepare($query_delete_cart);
+            $stmt_delete->bind_param("s", $nama_pelanggan);
+            $stmt_delete->execute();
+
+            $conn->commit();
+
+            header("Location: cart.php?message=Checkout%20berhasil");
+            exit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            die("Terjadi kesalahan saat proses checkout: " . $e->getMessage());
+        }
+    } else {
+        header("Location: cart.php?message=Keranjang%20kosong");
+        exit();
     }
 }
 
@@ -84,72 +155,8 @@ $result->data_seek(0);
 
 // Ambil pesan sukses dari parameter URL jika ada
 $success_message = isset($_GET['message']) ? $_GET['message'] : null;
-
-// Jika tidak ada item di keranjang
-$message = null;
-if ($result->num_rows == 0) {
-    $message = "Keranjang Anda kosong.";
-}
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
-    // Ambil data dari tabel keranjang
-    $query_cart = "SELECT * FROM keranjang WHERE Nama_Pelanggan_Keranjang = ?";
-    $stmt_cart = $conn->prepare($query_cart);
-    $stmt_cart->bind_param("s", $nama_pelanggan);
-    $stmt_cart->execute();
-    $result_cart = $stmt_cart->get_result();
-
-    // Jika keranjang tidak kosong
-    if ($result_cart->num_rows > 0) {
-        // Mulai transaksi
-        $conn->begin_transaction();
-
-        try {
-            // Pindahkan data ke tabel history
-            while ($row = $result_cart->fetch_assoc()) {
-                $query_insert_history = "INSERT INTO history 
-                    (Nama_Pelanggan_History, Id_Produk_History, Nama_Produk_History, Material_Produk_History, Warna_Produk_History, Harga_Produk_History, Jumlah_Produk_History, Tanggal_History, Tanggal_Estimasi)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                $stmt_history = $conn->prepare($query_insert_history);
-                $tanggal = date("Y-m-d");
-                $tanggal_estimasi = date("Y-m-d", strtotime("+3 days"));
-                $stmt_history->bind_param(
-                    "sissssiss",
-                    $row['Nama_Pelanggan_Keranjang'],
-                    $row['Id_Produk_Keranjang'],
-                    $row['Nama_Produk_Keranjang'],
-                    $row['Material_Produk_Keranjang'],
-                    $row['Warna_Produk_Keranjang'],
-                    $row['Harga_Produk_Keranjang'],
-                    $row['Jumlah_Produk_Keranjang'],
-                    $tanggal,
-                    $tanggal_estimasi
-                );
-                $stmt_history->execute();
-            }
-
-            // Kosongkan keranjang
-            $query_delete_cart = "DELETE FROM keranjang WHERE Nama_Pelanggan_Keranjang = ?";
-            $stmt_delete = $conn->prepare($query_delete_cart);
-            $stmt_delete->bind_param("s", $nama_pelanggan);
-            $stmt_delete->execute();
-
-            // Commit transaksi
-            $conn->commit();
-
-            // Redirect dengan pesan sukses
-            header("Location: cart.php?message=Checkout%20berhasil!");
-            exit();
-        } catch (Exception $e) {
-            // Rollback transaksi jika ada kesalahan
-            $conn->rollback();
-            die("Terjadi kesalahan saat proses checkout: " . $e->getMessage());
-        }
-    } else {
-        // Keranjang kosong
-        header("Location: cart.php?message=Keranjang%20kosong!");
-        exit();
-    }
-}
+$message = $result->num_rows == 0 ? "Keranjang Anda kosong." : null;
+?>
 
 ?>
 <!DOCTYPE html>
