@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 02, 2024 at 05:09 AM
+-- Generation Time: Dec 02, 2024 at 03:23 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -64,7 +64,8 @@ CREATE TABLE `history` (
 
 INSERT INTO `history` (`Nama_Pelanggan_History`, `Id_Produk_History`, `Nama_Produk_History`, `Material_Produk_History`, `Warna_Produk_History`, `Harga_Produk_History`, `Jumlah_Produk_History`, `Tanggal_History`, `Tanggal_Estimasi`) VALUES
 ('Bram', '1', 'Kursi', 'Kayu', 'Merah', 700000.00, '1', '2024-12-02', '2024-12-04'),
-('bram', '2', 'Meja', 'Kaca', 'Kuning', 200000.00, '1', '2024-12-02', '2024-12-06');
+('bram', '2', 'Meja', 'Kaca', 'Kuning', 200000.00, '1', '2024-12-02', '2024-12-06'),
+('Bram', '3', 'Lemari', 'Kayu', 'Coklat', 1500000.00, '1', '2024-12-02', '2024-12-10');
 
 -- --------------------------------------------------------
 
@@ -153,8 +154,26 @@ CREATE TABLE `produk` (
 --
 
 INSERT INTO `produk` (`Id_Produk`, `Nama_Produk`, `Warna_Produk`, `Harga_Produk`, `Material_Produk`, `Stok_Produk`) VALUES
-(1, 'Kursi', 'biru', 700000.00, 'kayu', 10),
-(2, 'Meja', 'coklat', 200000.00, 'kayu', 9);
+(0, 'Kasur Spring Bed Anak', 'Abu-abu', 2000000.00, 'Kain', 10),
+(1, 'Lemari Pakaian', 'Coklat', 1500000.00, 'Kayu', 10),
+(2, 'Lemari Dapur', 'Putih', 1200000.00, 'Kaca', 8),
+(3, 'Lemari Buku', 'Hitam', 800000.00, 'Logam', 15),
+(4, 'Kasur Spring Bed', 'Putih', 2500000.00, 'Kain', 5),
+(5, 'Kasur Busa', 'Biru', 1800000.00, 'Kain', 7),
+(6, 'Kaki Meja Besi', 'Hitam', 50000.00, 'Logam', 50),
+(7, 'Kaki Meja Kayu', 'Coklat', 40000.00, 'Kayu', 30),
+(8, 'Kaki Kasur Logam', 'Perak', 60000.00, 'Logam', 20),
+(9, 'Kaki Kasur Plastik', 'Putih', 30000.00, 'Plastik', 40),
+(10, 'Pegangan Pintu Stainless', 'Perak', 70000.00, 'Logam', 25),
+(11, 'Pegangan Pintu Kayu', 'Coklat', 50000.00, 'Kayu', 15),
+(12, 'Meja Makan', 'Coklat', 1800000.00, 'Kayu', 10),
+(13, 'Meja Kantor', 'Hitam', 1500000.00, 'Logam', 8),
+(14, 'Meja Tamu', 'Putih', 1200000.00, 'Kaca', 12),
+(15, 'Meja Belajar', 'Biru', 800000.00, 'Kayu', 20),
+(16, 'Kursi Tamu', 'Hitam', 500000.00, 'Kayu', 15),
+(17, 'Kursi Kantor', 'Merah', 750000.00, 'Plastik', 10),
+(18, 'Kursi Lipat', 'Abu-Abu', 300000.00, 'Logam', 25),
+(19, 'Kursi Anak', 'Kuning', 200000.00, 'Kayu', 30);
 
 -- --------------------------------------------------------
 
