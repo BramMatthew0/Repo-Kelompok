@@ -12,15 +12,14 @@
         }
 
         body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #000000 100%);
-    min-height: 100vh;
-    display: flex
-;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #000000 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
         .container {
             display: flex;
@@ -35,33 +34,22 @@
         }
 
         .product-item {
-            flex: 1; /* Gambar akan memakan ruang yang proporsional */
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         .product-item img {
-            width: 500px;  /* Menetapkan lebar gambar */
-            height: 500px; /* Menetapkan tinggi gambar */
-            object-fit: cover; /* Agar gambar tetap terpotong jika ukurannya tidak sesuai */
+            width: 500px;
+            height: 500px;
+            object-fit: cover;
             border-radius: 8px;
-            margin-right: 20px; /* Memberikan jarak antara gambar dan teks */
         }
 
         .login-box {
-            flex: 2; /* Form akan memakan lebih banyak ruang */
+            flex: 2;
             max-width: 450px;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .login-header h1 {
-            color: #2c3e50;
-            font-size: 2em;
         }
 
         .form-group {
@@ -153,21 +141,17 @@
 <body>
     <div class="container">
         <div class="product-item">
-        <img src="/TubesManpro/img/logoNew.jpeg" alt="Logo Kapi">
-
+            <img src="./img/logoNew.jpeg" alt="Logo Kapi">
         </div>
 
         <div class="login-box">
-            <!-- <div class="login-header">
-                <h1>Toko Furnitur Kapi</h1>
-            </div> -->
-
-            <form action="" method="POST" class="login-form">
+            <!-- Form login -->
+            <form action="./patient/process_login.php" method="POST" class="login-form">
                 <div class="form-group">
                     <label for="user_type">Login Sebagai:</label>
-                    <select name="user_type" id="user_type" required onchange="updateFormAction(this.value)">
+                    <select name="user_type" id="user_type" required onchange="updateFormAction()">
                         <option value="pelanggan">Pelanggan</option>
-                        <option value="admin">Pemilik</option>
+                        <option value="pemilik">Pemilik</option>
                     </select>
                 </div>
 
@@ -178,17 +162,15 @@
 
                 <div class="form-group">
                     <label for="password">Password:</label>
-                    <div class="password-input">
-                        <input type="password" id="password" name="password" required autocomplete="current-password">
-                        <button type="button" class="toggle-password" onclick="togglePassword()">Show</button>
-                    </div>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
                 </div>
 
                 <div class="form-group">
                     <button type="submit" class="btn">Login</button>
                 </div>
 
-                <div class="form-links" id="patient-links">
+                <!-- Link untuk pelanggan -->
+                <div class="form-links" id="register-link">
                     <a href="./patient/register.php">Daftar Akun Baru</a>
                 </div>
             </form>
@@ -196,38 +178,22 @@
     </div>
 
     <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleBtn = document.querySelector('.toggle-password');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.textContent = 'Hide';
-            } else {
-                passwordInput.type = 'password';
-                toggleBtn.textContent = 'Show';
-            }
-        }
-
-        function updateFormAction(userType) {
+        function updateFormAction() {
             const form = document.querySelector('.login-form');
-            const patientLinks = document.getElementById('patient-links');
+            const userType = document.getElementById('user_type').value;
+            const registerLink = document.getElementById('register-link');
 
-            switch (userType) {
-                case 'pemilik':
-                    form.action = 'admin/process_login.php';
-                    break;
-                case 'pelanggan':
-                    form.action = 'patient/process_login.php';
-                    break;
+            if (userType === 'pemilik') {
+                form.action = './admin/process_login.php';
+                registerLink.style.display = 'none'; // Hide register link for admin
+            } else {
+                form.action = './patient/process_login.php';
+                registerLink.style.display = 'block'; // Show register link for pelanggan
             }
-            patientLinks.style.display = userType === 'pelanggan' ? 'block' : 'none';
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const userType = document.getElementById('user_type');
-            updateFormAction(userType.value);
-        });
+        // Set initial action when page loads
+        document.addEventListener('DOMContentLoaded', updateFormAction);
     </script>
 </body>
 </html>
