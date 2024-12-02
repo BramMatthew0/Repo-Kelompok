@@ -287,9 +287,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </select>
                 <label for="komentar">Komentar Review:</label>
                 <textarea id="komentar" name="komentar" rows="4" required></textarea>
-
-                <button type="submit">Kirim Review</button>
-                <button type="button" class="back-button" onclick="closeModal()">Back</button>
+                <div style="display: flex; justify-content: space-between">
+                <button type="submit"style="background-color: #2ecc71; padding: 15px 25px; border: none; border-radius: 5px; color: white;">Kirim Review</button>
+                <button type="button"style="background-color: #e74c3c; padding: 15px 25px; border: none; border-radius: 5px; color: white;" onclick="closeModal()" >Back</button>
+                </div>
             </form>
         </div>
     </div>

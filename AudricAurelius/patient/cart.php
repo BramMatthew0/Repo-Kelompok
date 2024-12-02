@@ -23,6 +23,35 @@ if (!$result_pelanggan) {
 $pelanggan = $result_pelanggan->fetch_assoc();
 $nama_pelanggan = $pelanggan['Nama'];
 
+// Tangani pembaruan data keranjang
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_cart'])) {
+    $id_keranjang = intval($_POST['id_keranjang']);
+    $material = $_POST['material'];
+    $warna = $_POST['warna'];
+    $jumlah = intval($_POST['jumlah']);
+
+    // Validasi input
+    if ($id_keranjang > 0 && $jumlah > 0 && !empty($material) && !empty($warna)) {
+        // Query untuk memperbarui data
+        $query_update = "UPDATE keranjang 
+                         SET Material_Produk_Keranjang = ?, 
+                             Warna_Produk_Keranjang = ?, 
+                             Jumlah_Produk_Keranjang = ? 
+                         WHERE Id_Produk_Keranjang = ?";
+        $stmt = $conn->prepare($query_update);
+        $stmt->bind_param("ssii", $material, $warna, $jumlah, $id_keranjang);
+
+        if ($stmt->execute()) {
+            header("Location: cart.php?message=Item%20berhasil%20diperbarui");
+            exit();
+        } else {
+            die("Gagal memperbarui item: " . $stmt->error);
+        }
+    } else {
+        die("Data tidak valid. Pastikan semua field diisi dengan benar.");
+    }
+}
+
 // Hapus item dari keranjang jika parameter 'remove' ada
 if (isset($_GET['remove'])) {
     $id_keranjang = intval($_GET['remove']); // Pastikan nilai ID valid
@@ -37,59 +66,7 @@ if (isset($_GET['remove'])) {
     }
 }
 
-// Handle Checkout
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
-    // Query untuk memindahkan data dari keranjang ke history
-    $query_move_to_history = "INSERT INTO history (Nama_Pelanggan_History, Id_Produk_History, Nama_Produk_History, Material_Produk_History, Warna_Produk_History, Harga_Produk_History, Jumlah_Produk_History)
-                              SELECT Nama_Pelanggan_Keranjang, Id_Produk_Keranjang, Nama_Produk_Keranjang, Material_Produk_Keranjang, Warna_Produk_Keranjang, Harga_Produk_Keranjang, Jumlah_Produk_Keranjang
-                              FROM keranjang
-                              WHERE Nama_Pelanggan_Keranjang = ?";
-    $stmt = $conn->prepare($query_move_to_history);
-    $stmt->bind_param("s", $nama_pelanggan);
-
-    if ($stmt->execute()) {
-        // Mengambil data keranjang untuk mengurangi stok produk
-        $query_cart_items = "SELECT Id_Produk_Keranjang, Jumlah_Produk_Keranjang FROM keranjang WHERE Nama_Pelanggan_Keranjang = ?";
-        $stmt_cart_items = $conn->prepare($query_cart_items);
-        $stmt_cart_items->bind_param("s", $nama_pelanggan);
-        $stmt_cart_items->execute();
-        $result_cart_items = $stmt_cart_items->get_result();
-
-        // Kurangi stok produk berdasarkan data di keranjang
-        while ($cart_item = $result_cart_items->fetch_assoc()) {
-            $id_produk = $cart_item['Id_Produk_Keranjang'];
-            $jumlah_pesanan = (int)$cart_item['Jumlah_Produk_Keranjang'];
-
-            // Kurangi stok di tabel produk
-            $query_update_stok = "UPDATE produk SET Stok_Produk = Stok_Produk - ? WHERE Id_Produk = ? AND Stok_Produk >= ?";
-            $stmt_update_stok = $conn->prepare($query_update_stok);
-            $stmt_update_stok->bind_param("iii", $jumlah_pesanan, $id_produk, $jumlah_pesanan);
-            if (!$stmt_update_stok->execute()) {
-                die("Gagal mengupdate stok produk: " . $conn->error);
-            }
-        }
-
-        // Jika berhasil, kosongkan tabel keranjang untuk pelanggan
-        $query_clear_cart = "DELETE FROM keranjang WHERE Nama_Pelanggan_Keranjang = ?";
-        $stmt_clear = $conn->prepare($query_clear_cart);
-        $stmt_clear->bind_param("s", $nama_pelanggan);
-
-        if ($stmt_clear->execute()) {
-            // Redirect dengan pesan sukses
-            header("Location: cart.php?message=Checkout%20berhasil");
-            exit();
-        } else {
-            die("Gagal mengosongkan keranjang: " . $conn->error);
-        }
-    } else {
-        die("Gagal memindahkan data ke history: " . $conn->error);
-    }
-}
-
-// Ambil pesan sukses dari parameter URL jika ada
-$success_message = isset($_GET['message']) ? $_GET['message'] : null;
-
-// Mengambil data keranjang berdasarkan pelanggan yang login
+// Ambil data keranjang
 $query = "SELECT Id_Produk_Keranjang AS ID_Keranjang, Nama_Produk_Keranjang, Material_Produk_Keranjang, Warna_Produk_Keranjang, Harga_Produk_Keranjang, Jumlah_Produk_Keranjang 
           FROM keranjang 
           WHERE Nama_Pelanggan_Keranjang = ?";
@@ -103,14 +80,16 @@ $total_harga = 0;
 while ($item = $result->fetch_assoc()) {
     $total_harga += $item['Harga_Produk_Keranjang'] * $item['Jumlah_Produk_Keranjang'];
 }
-$result->data_seek(0); // Kembalikan pointer hasil query ke awal untuk loop berikutnya
+$result->data_seek(0);
 
+// Ambil pesan sukses dari parameter URL jika ada
+$success_message = isset($_GET['message']) ? $_GET['message'] : null;
 
+// Jika tidak ada item di keranjang
 $message = null;
 if ($result->num_rows == 0) {
     $message = "Keranjang Anda kosong.";
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -135,7 +114,6 @@ if ($result->num_rows == 0) {
             position: relative;
             width: 100%;
         }
-
         nav ul {
             list-style: none;
             display: flex;
@@ -143,32 +121,27 @@ if ($result->num_rows == 0) {
             padding: 0;
             margin: 0;
         }
-
         nav ul li {
-            margin: 0 20px;  /* Menambah jarak antar item */
+            margin: 0 20px;
         }
-
         nav a {
             color: white;
             text-decoration: none;
-            font-size: 20px;  /* Memperbesar ukuran font */
-            font-weight: bold;  /* Menambah ketebalan teks */
-            padding: 10px 20px;  /* Memberikan padding untuk memperbesar area klik */
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px 20px;
         }
-
         nav a:hover {
             color: #007bff;
-            background-color: #444; /* Menambahkan efek background saat hover */
-            border-radius: 5px; /* Memberikan efek melengkung pada sudut */
+            background-color: #444;
+            border-radius: 5px;
         }
-
         .cart-icon {
             position: absolute;
-            right: 20px; /* Menempatkan ikon di kanan */
+            right: 20px;
             font-size: 24px;
             color: white;
         }
-
         .cart-icon:hover {
             color: #3498db;
         }
@@ -223,12 +196,6 @@ if ($result->num_rows == 0) {
         .checkout-button:hover {
             background-color: #27ae60;
         }
-        .success-message {
-            color: green;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
-        }
         .modal {
             display: none;
             position: fixed;
@@ -242,8 +209,8 @@ if ($result->num_rows == 0) {
         }
         .modal-content {
             background-color: white;
-            padding: 50px;
-            border-radius: 8px;
+            padding: 30px;
+            border-radius: 10px;
             width: 400px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
@@ -252,30 +219,34 @@ if ($result->num_rows == 0) {
             flex-direction: column;
             gap: 15px;
         }
-        .modal-content label {
-            font-weight: bold;
-        }
-        .modal-content input, .modal-content textarea, .modal-content select {
-            width: 100%;
+        .modal-content input {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
-        }
-        .modal-content textarea {
-            resize: none;
+            width: 100%;
         }
         .modal-content button {
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            font-weight: bold;
+            padding: 15px;
             border: none;
             border-radius: 5px;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
         }
         .modal-content button:hover {
-            background-color: #0056b3;
+            opacity: 0.9;
         }
+        select {
+            font-size: 16px; /* Ukuran teks lebih besar */
+            padding: 10px;   /* Menambah ruang di dalam dropdown */
+            width: 100%;     /* Membuat lebar dropdown menyesuaikan kontainer */
+            border: 1px solid #ccc; /* Border untuk tampilan lebih jelas */
+            border-radius: 5px; /* Membuat sudut dropdown melengkung */
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Memberikan efek bayangan */
+            background-color: #fff; /* Warna latar belakang dropdown */
+            cursor: pointer; /* Menambahkan pointer saat hover */
+        }
+        
     </style>
 </head>
 <body>
@@ -294,50 +265,91 @@ if ($result->num_rows == 0) {
 
     <!-- Keranjang Belanja -->
     <section class="cart-items">
-    <h2>Keranjang Belanja Anda</h2>
-
-    <!-- Tampilkan pesan sukses jika ada -->
-    <?php if ($success_message): ?>
-        <p class="success-message"><?php echo htmlspecialchars($success_message); ?></p>
-    <?php endif; ?>
-
-    <?php if ($message): ?>
-        <p><?php echo $message; ?></p>
-    <?php else: ?>
-        <?php while ($item = $result->fetch_assoc()): ?>
-            <div class="cart-item">
-                <div>
-                    <p><strong><?php echo htmlspecialchars($item['Nama_Produk_Keranjang']); ?></strong></p>
-                    <p>Material: <?php echo htmlspecialchars($item['Material_Produk_Keranjang']); ?></p>
-                    <p>Warna: <?php echo htmlspecialchars($item['Warna_Produk_Keranjang']); ?></p>
-                    <p>Harga: Rp <?php echo number_format($item['Harga_Produk_Keranjang'], 0, ',', '.'); ?></p>
-                    <p>Jumlah: <?php echo (int)$item['Jumlah_Produk_Keranjang']; ?></p>
-                </div>
-                <div class="action-buttons">
-                    <a class="edit" href="edit.php?id=<?php echo $item['ID_Keranjang']; ?>">Edit</a>
-                    <a class="remove" href="cart.php?remove=<?php echo $item['ID_Keranjang']; ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">Remove</a>
-                </div>
-            </div>
-        <?php endwhile; ?>
-        
-        <!-- Tampilkan Total Harga -->
-        <?php if ($total_harga > 0): ?>
-            <p style="font-weight: bold; font-size: 18px; text-align: center; margin-top: 20px;">
-                Total yang harus dibayarkan: Rp <?php echo number_format($total_harga, 0, ',', '.'); ?>
-            </p>
+        <h2>Keranjang Belanja Anda</h2>
+        <?php if ($success_message): ?>
+            <p class="success-message"><?php echo htmlspecialchars($success_message); ?></p>
         <?php endif; ?>
-    <?php endif; ?>
+        <?php if ($message): ?>
+            <p><?php echo $message; ?></p>
+        <?php else: ?>
+            <?php while ($item = $result->fetch_assoc()): ?>
+                <div class="cart-item">
+                    <div>
+                        <p><strong><?php echo htmlspecialchars($item['Nama_Produk_Keranjang']); ?></strong></p>
+                        <p>Material: <?php echo htmlspecialchars($item['Material_Produk_Keranjang']); ?></p>
+                        <p>Warna: <?php echo htmlspecialchars($item['Warna_Produk_Keranjang']); ?></p>
+                        <p>Harga: Rp <?php echo number_format($item['Harga_Produk_Keranjang'], 0, ',', '.'); ?></p>
+                        <p>Jumlah: <?php echo (int)$item['Jumlah_Produk_Keranjang']; ?></p>
+                    </div>
+                    <div class="action-buttons">
+                        <a class="edit" href="javascript:void(0)" onclick="openEditModal('<?php echo $item['ID_Keranjang']; ?>', '<?php echo htmlspecialchars($item['Material_Produk_Keranjang']); ?>', '<?php echo htmlspecialchars($item['Warna_Produk_Keranjang']); ?>', '<?php echo (int)$item['Jumlah_Produk_Keranjang']; ?>')">Edit</a>
+                        <a class="remove" href="cart.php?remove=<?php echo $item['ID_Keranjang']; ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">Remove</a>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+            <?php if ($total_harga > 0): ?>
+                <p style="font-weight: bold; font-size: 18px; text-align: center; margin-top: 20px;">
+                    Total yang harus dibayarkan: Rp <?php echo number_format($total_harga, 0, ',', '.'); ?>
+                </p>
+            <?php endif; ?>
+        <?php endif; ?>
+        <form method="POST" action="">
+            <button type="submit" name="checkout" class="checkout-button">Checkout</button>
+        </form>
+    </section>
+
+    <!-- Modal Edit -->
+    <div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3>Edit Produk</h3>
+        <form method="POST" action="cart.php">
+            <input type="hidden" name="update_cart" value="1">
+            <input type="hidden" id="editItemId" name="id_keranjang">
+            
+            <label for="editMaterial">Material:</label>
+            <select id="editMaterial" name="material" required>
+                <?php
+                $materials = ['Kayu', 'Kaca', 'Plastik', 'Logam'];
+                foreach ($materials as $material) {
+                    echo "<option value=\"$material\">$material</option>";
+                }
+                ?>
+            </select>
+
+            <label for="editWarna">Warna:</label>
+            <select id="editWarna" name="warna" required>
+                <?php
+                $colors = ['Merah', 'Kuning', 'Hijau', 'Biru', 'Ungu', 'Hitam', 'Putih', 'Abu', 'Coklat'];
+                foreach ($colors as $color) {
+                    echo "<option value=\"$color\">$color</option>";
+                }
+                ?>
+            </select>
+
+            <label for="editJumlah">Jumlah:</label>
+            <input type="number" id="editJumlah" name="jumlah" min="1" required>
+
+            <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 20px;">
+                <button type="submit" style="background-color: #2ecc71; padding: 15px 25px; border: none; border-radius: 5px; color: white;">Update</button>
+                <button type="button" style="background-color: #e74c3c; padding: 15px 25px; border: none; border-radius: 5px; color: white;" onclick="closeEditModal()">Back</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- JavaScript -->
     <script>
-    function openModal() {
-        document.getElementById("reviewModal").style.display = "flex";
-    }
-    function closeModal() {
-        document.getElementById("reviewModal").style.display = "none";
-    }
-</script>
-    <form method="POST" action="">
-        <button type="submit" name="checkout" class="checkout-button">Checkout</button>
-    </form>
-</section>
+        function openEditModal(id, material, warna, jumlah) {
+            document.getElementById("editModal").style.display = "flex";
+            document.getElementById("editItemId").value = id;
+            document.getElementById("editMaterial").value = material;
+            document.getElementById("editWarna").value = warna;
+            document.getElementById("editJumlah").value = jumlah;
+        }
+
+        function closeEditModal() {
+            document.getElementById("editModal").style.display = "none";
+        }
+    </script>
 </body>
 </html>

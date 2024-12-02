@@ -147,9 +147,9 @@ body {
     <h2>Form Kontak</h2>
     <p><strong>Nama:</strong> <?php echo htmlspecialchars($nama_pelanggan); ?></p>
     <form action="contact.php" method="POST">
-        <label for="review_contact"><strong>Pesan :</strong></label>
+        <label for="review_contact"><p><strong>Pesan :</strong></p></label>
         <textarea name="review_contact" id="review_contact" rows="4" required></textarea>
-        <button type="submit">Kirim</button>
+        <p><button type="submit">Kirim</button></p>
     </form>
 </div>
 
