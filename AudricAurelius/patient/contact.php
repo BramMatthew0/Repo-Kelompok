@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 require_once('../config/db_connection.php');
 
@@ -10,35 +10,73 @@ if (!isset($_SESSION['username'])) {
 
 // Ambil data nama pelanggan dari database berdasarkan username di sesi
 $username = $_SESSION['username'];
-$query_pelanggan = "SELECT Nama FROM pelanggan WHERE Username = '$username'";
-$result_pelanggan = $conn->query($query_pelanggan);
+$query_pelanggan = "SELECT Nama FROM pelanggan WHERE Username = ?";
+$stmt_pelanggan = $conn->prepare($query_pelanggan);
 
-if (!$result_pelanggan) {
-    die("Query pelanggan gagal: " . $conn->error);
+if ($stmt_pelanggan) {
+    $stmt_pelanggan->bind_param("s", $username);
+    $stmt_pelanggan->execute();
+    $result_pelanggan = $stmt_pelanggan->get_result();
+
+    if ($result_pelanggan->num_rows > 0) {
+        $pelanggan = $result_pelanggan->fetch_assoc();
+        $nama_pelanggan = $pelanggan['Nama'];
+    } else {
+        die("Data pelanggan tidak ditemukan. Pastikan username terdaftar di tabel pelanggan.");
+    }
+    $stmt_pelanggan->close();
+} else {
+    die("Kesalahan pada query pelanggan: " . $conn->error);
 }
-
-$pelanggan = $result_pelanggan->fetch_assoc();
-$nama_pelanggan = $pelanggan['Nama'];
 
 // Proses form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $review_contact = $_POST['review_contact'];
+    $review_contact = trim($_POST['review_contact']);
     $date_contact = date("Y-m-d H:i:s"); // Format waktu saat ini (YYYY-MM-DD HH:MM:SS)
+    $pengirim = $nama_pelanggan; // Nama pelanggan yang sedang login sebagai pengirim
 
-    // Masukkan nama pelanggan, review, dan waktu submit ke database
-    $query_insert = "INSERT INTO contact (Nama_Contact, Review_Contact, Date_Contact) 
-                     VALUES ('$nama_pelanggan', '$review_contact', '$date_contact')";
-    if ($conn->query($query_insert) === TRUE) {
-        echo "<script>
-                alert('Submit berhasil!');
-                window.location.href='contact.php';
-              </script>";
-        exit();
+
+    if (!empty($review_contact)) {
+        // Masukkan data pengirim, pesan, penerima, dan waktu ke database
+        $query_insert = "INSERT INTO contact (Nama_Contact, Review_Contact, Date_Contact, Penerima) VALUES (?, ?, ?, ?)";
+        $stmt_insert = $conn->prepare($query_insert);
+
+        if ($stmt_insert) {
+            $stmt_insert->bind_param("ssss", $pengirim, $review_contact, $date_contact, $penerima);
+            if ($stmt_insert->execute()) {
+                echo "<script>
+                        alert('Pesan berhasil dikirim!');
+                        window.location.href='contact.php';
+                      </script>";
+                exit();
+            } else {
+                echo "Kesalahan saat menyimpan pesan: " . $conn->error;
+            }
+            $stmt_insert->close();
+        } else {
+            die("Kesalahan pada query insert: " . $conn->error);
+        }
     } else {
-        echo "Error: " . $conn->error;
+        echo "<script>alert('Pesan tidak boleh kosong.');</script>";
     }
 }
+
+// Ambil data kontak dari database untuk pelanggan yang sedang login
+$query_contacts = "SELECT Nama_Contact, Review_Contact, Date_Contact 
+                   FROM contact 
+                   WHERE Penerima = ? OR Nama_Contact = ?
+                   ORDER BY Date_Contact DESC";
+$stmt_contacts = $conn->prepare($query_contacts);
+
+if ($stmt_contacts) {
+    $stmt_contacts->bind_param("ss", $nama_pelanggan, $nama_pelanggan);
+    $stmt_contacts->execute();
+    $result_contacts = $stmt_contacts->get_result();
+} else {
+    die("Query kontak gagal: " . $conn->error);
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -127,6 +165,46 @@ body {
         .cart-icon:hover {
             color: #3498db;
         }
+
+        .contact-table {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .contact-table h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+
     </style>
 </head>
 <body>
@@ -153,5 +231,30 @@ body {
     </form>
 </div>
 
+<div class="contact-table">
+    <h2>Daftar Kontak</h2>
+    <?php if ($result_contacts->num_rows > 0): ?>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Pesan</th>
+                    <th>Tanggal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = $result_contacts->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($row['Nama_Contact']); ?></td>
+                        <td><?php echo htmlspecialchars($row['Review_Contact']); ?></td>
+                        <td><?php echo htmlspecialchars($row['Date_Contact']); ?></td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p style="text-align: center;">Tidak ada kontak yang tersedia.</p>
+    <?php endif; ?>
+</div>
 </body>
 </html>

@@ -8,11 +8,51 @@ if (!isset($_SESSION['username']) || $_SESSION['user_type'] !== 'admin') {
     exit();
 }
 
-// Ambil data kontak dari database
-$query_contacts = "SELECT Nama_Contact, Review_Contact, Date_Contact FROM contact ORDER BY Date_Contact DESC";
-$result_contacts = $conn->query($query_contacts);
+// Ambil data nama admin dari sesi
+$admin_name = "Admin"; // Nama pengirim selalu Admin
 
-if (!$result_contacts) {
+// Proses pengiriman pesan
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $review_contact = trim($_POST['review_contact']);
+    $date_contact = date("Y-m-d H:i:s"); // Format waktu saat ini (YYYY-MM-DD HH:MM:SS)
+    $pengirim = $admin_name; // Nama pengirim selalu Admin
+    $penerima = "All"; // Bisa diatur ke semua penerima atau spesifik
+
+    if (!empty($review_contact)) {
+        // Masukkan data pesan ke database
+        $query_insert = "INSERT INTO contact (Nama_Contact, Review_Contact, Date_Contact, Penerima) VALUES (?, ?, ?, ?)";
+        $stmt_insert = $conn->prepare($query_insert);
+
+        if ($stmt_insert) {
+            $stmt_insert->bind_param("ssss", $pengirim, $review_contact, $date_contact, $penerima);
+            if ($stmt_insert->execute()) {
+                echo "<script>
+                        alert('Pesan berhasil dikirim!');
+                        window.location.href='contact.php';
+                      </script>";
+                exit();
+            } else {
+                echo "Kesalahan saat menyimpan pesan: " . $conn->error;
+            }
+            $stmt_insert->close();
+        } else {
+            die("Kesalahan pada query insert: " . $conn->error);
+        }
+    } else {
+        echo "<script>alert('Pesan tidak boleh kosong.');</script>";
+    }
+}
+
+// Ambil semua data dari tabel contact
+$query_contacts = "SELECT Nama_Contact, Review_Contact, Date_Contact 
+                   FROM contact 
+                   ORDER BY Date_Contact DESC";
+$stmt_contacts = $conn->prepare($query_contacts);
+
+if ($stmt_contacts) {
+    $stmt_contacts->execute();
+    $result_contacts = $stmt_contacts->get_result();
+} else {
     die("Query kontak gagal: " . $conn->error);
 }
 ?>
@@ -22,7 +62,7 @@ if (!$result_contacts) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontak Admin</title>
+    <title>Kontak</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         body {
@@ -68,6 +108,37 @@ if (!$result_contacts) {
             border-radius: 5px;
         }
 
+        .contact-form {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .contact-form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .contact-form button:hover {
+            background-color: #0056b3;
+        }
+
         .contact-table {
             max-width: 800px;
             margin: 50px auto;
@@ -106,10 +177,9 @@ if (!$result_contacts) {
         table tr:hover {
             background-color: #f1f1f1;
         }
-
         .cart-icon {
             position: absolute;
-            right: 20px;
+            right: 20px; /* Menempatkan ikon di kanan */
             font-size: 24px;
             color: white;
         }
@@ -123,15 +193,26 @@ if (!$result_contacts) {
 
 <nav>
     <ul>
-        <li><a href="admin_dashboard.php">Home</a></li>
+    <li><a href="admin_dashboard.php">Home</a></li>
         <li><a href="review.php">Review</a></li>
         <li><a href="contact.php">Contact</a></li>
         <li><a href="product.php">Product</a></li>
         <li><a href="order.php">Order</a></li>
         <li><a href="financial.php">Financial Report</a></li>
         <li><a href="logout.php">Logout</a></li>
+        <li><a href="cart.php"><i class="fas fa-shopping-cart cart-icon"></i></a></li>
     </ul>
 </nav>
+
+<div class="contact-form">
+    <h2>Form Kontak</h2>
+    <p><strong>Nama:</strong> Admin</p>
+    <form action="contact.php" method="POST">
+        <label for="review_contact"><p><strong>Pesan :</strong></p></label>
+        <textarea name="review_contact" id="review_contact" rows="4" required></textarea>
+        <p><button type="submit">Kirim</button></p>
+    </form>
+</div>
 
 <div class="contact-table">
     <h2>Daftar Kontak</h2>
@@ -158,6 +239,5 @@ if (!$result_contacts) {
         <p style="text-align: center;">Tidak ada kontak yang tersedia.</p>
     <?php endif; ?>
 </div>
-
 </body>
 </html>
