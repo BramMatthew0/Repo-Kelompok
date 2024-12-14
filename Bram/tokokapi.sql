@@ -64,7 +64,10 @@ CREATE TABLE `history` (
 
 INSERT INTO `history` (`Nama_Pelanggan_History`, `Id_Produk_History`, `Nama_Produk_History`, `Material_Produk_History`, `Warna_Produk_History`, `Harga_Produk_History`, `Jumlah_Produk_History`, `Tanggal_History`, `Tanggal_Estimasi`) VALUES
 ('Bram', '1', 'Kursi', 'Kayu', 'Merah', 700000.00, '1', '2024-12-02', '2024-12-04'),
-('bram', '2', 'Meja', 'Kaca', 'Kuning', 200000.00, '1', '2024-12-02', '2024-12-06'),
+('bram', '2', 'Meja', 'Kaca', 'Kuning', 200000.00, '1', '2024-11-02', '2024-11-06'),
+('bram', '2', 'Meja', 'Kaca', 'Kuning', 200000.00, '1', '2020-2-02', '2020-2-06'),
+('bram', '2', 'Meja', 'Kaca', 'Kuning', 200000.00, '1', '2022-4-10', '2022-4-12'),
+('bram', '2', 'Meja', 'Kaca', 'Kuning', 200000.00, '1', '2023-1-01', '2023-1-03'),
 ('Bram', '3', 'Lemari', 'Kayu', 'Coklat', 1500000.00, '1', '2024-12-02', '2024-12-10');
 
 -- --------------------------------------------------------
