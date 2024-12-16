@@ -65,13 +65,12 @@ if ($stmt_contacts) {
     <title>Kontak</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
-        body {
+            body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
         }
-
         nav {
             background-color: #333;
             padding: 15px 0;
@@ -91,21 +90,21 @@ if ($stmt_contacts) {
         }
 
         nav ul li {
-            margin: 0 20px;
+            margin: 0 20px;  /* Menambah jarak antar item */
         }
 
         nav a {
             color: white;
             text-decoration: none;
-            font-size: 20px;
-            font-weight: bold;
-            padding: 10px 20px;
+            font-size: 20px;  /* Memperbesar ukuran font */
+            font-weight: bold;  /* Menambah ketebalan teks */
+            padding: 10px 20px;  /* Memberikan padding untuk memperbesar area klik */
         }
 
         nav a:hover {
             color: #007bff;
-            background-color: #444;
-            border-radius: 5px;
+            background-color: #444; /* Menambahkan efek background saat hover */
+            border-radius: 5px; /* Memberikan efek melengkung pada sudut */
         }
 
         .contact-form {
@@ -177,16 +176,6 @@ if ($stmt_contacts) {
         table tr:hover {
             background-color: #f1f1f1;
         }
-        .cart-icon {
-            position: absolute;
-            right: 20px; /* Menempatkan ikon di kanan */
-            font-size: 24px;
-            color: white;
-        }
-
-        .cart-icon:hover {
-            color: #3498db;
-        }
     </style>
 </head>
 <body>
@@ -200,7 +189,6 @@ if ($stmt_contacts) {
         <li><a href="order.php">Order</a></li>
         <li><a href="financial.php">Financial Report</a></li>
         <li><a href="logout.php">Logout</a></li>
-        <li><a href="cart.php"><i class="fas fa-shopping-cart cart-icon"></i></a></li>
     </ul>
 </nav>
 

@@ -238,30 +238,6 @@ value="<?php echo isset($_POST['no_hp']) ? htmlspecialchars($_POST['no_hp']) : '
 <label for="alamat">Alamat:</label>
 <textarea id="alamat" name="alamat" rows="3" required><?php echo isset($_POST['alamat']) ? htmlspecialchars($_POST['alamat']) : ''; ?></textarea>
 </div>
-<div class="form-group">
-<label for="kelurahan">Kelurahan:</label>
-<select id="kelurahan" name="kelurahan" required>
-<option value="">Pilih Kelurahan</option>
-<option value="Antapani Kidul" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Antapani Kidul') ? 'selected' : ''; ?>>Antapani Kidul</option>
-<option value="Antapani Tengah" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Antapani Tengah') ? 'selected' : ''; ?>>Antapani Tengah</option>
-<option value="Antapani Wetan" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Antapani Wetan') ? 'selected' : ''; ?>>Antapani Wetan</option>
-<option value="Cempaka" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Cempaka') ? 'selected' : ''; ?>>Cempaka</option>
-<option value="Ciaranten" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Cisaranten') ? 'selected' : ''; ?>>Cisaranten</option>
-<option value="Cisaranten Bina Harapan" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Cisaranten Bina Harapan') ? 'selected' : ''; ?>>Cisaranten Bina Harapan</option>
-<option value="Cisaranten Kulon" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Cisaranten Kulon') ? 'selected' : ''; ?>>Cisaranten Kulon</option>
-<option value="Ciroyom" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Ciroyom') ? 'selected' : ''; ?>>Ciroyom</option>
-<option value="Dunguscariang" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Dunguscariang') ? 'selected' : ''; ?>>Dunguscariang</option>
-<option value="Garuda" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Garuda') ? 'selected' : ''; ?>>Garuda</option>
-<option value="Karasak" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Karasak') ? 'selected' : ''; ?>>Karasak</option>
-<option value="Kebon Jeruk" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Kebon Jeruk') ? 'selected' : ''; ?>>Kebon Jeruk</option>
-<option value="Maleber" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Maleber') ? 'selected' : ''; ?>>Maleber</option>
-<option value="Panjunan" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Panjunan') ? 'selected' : ''; ?>>Panjunan</option>
-<option value="Pelindung Hewan" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Pelindung Hewan') ? 'selected' : ''; ?>>Pelindung Hewan</option>
-<option value="Nyengseret" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Nyengseret') ? 'selected' : ''; ?>>Nyengseret</option>
-<option value="Sukamiskin" <?php echo (isset($_POST['kelurahan']) && $_POST['kelurahan'] == 'Sukamiskin') ? 'selected' : ''; ?>>Sukamiskin</option>
-
-</select>
-</div>
 
 <div class="form-group">
 <label for="kecamatan">Kecamatan:</label>
